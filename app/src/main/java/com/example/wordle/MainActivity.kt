@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -23,20 +24,17 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.wordle.ui.theme.WordleTheme
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
@@ -259,10 +257,15 @@ fun WordleGrid(charList: Array<Array<Char>>, wordToGuess: String, currentGuessIn
 
 @Composable
 fun LetterBox(letter: String, color: Color) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp
+    print("screen width: $screenWidth")
+    val boxWidth = (screenWidth - 75)/ 5
+
     Box(
         modifier = Modifier
             .padding(6.dp)
             .background(color)
+            .size(width = boxWidth.dp, height = boxWidth.dp)
             .wrapContentSize(Alignment.Center)
     ) {
         Text(
