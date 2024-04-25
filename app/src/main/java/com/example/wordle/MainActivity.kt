@@ -1,14 +1,14 @@
 package com.example.wordle
 
+import WordSupplier
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,7 +20,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,24 +31,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.wordle.ui.theme.WordleTheme
 import androidx.compose.ui.unit.dp
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 class MainActivity : ComponentActivity() {
-    companion object {
-        val wordsToGuess = arrayOf(
-            "Apple", "Beach", "Chair", "Dance", "Eagle",
-            "Fairy", "Ghost", "House", "Jelly", "Koala",
-            "Lemon", "Magic", "Nurse", "Ocean", "Peach",
-            "Queen", "River", "Snake", "Tiger", "Umbra",
-            "Grant"
-        )
-    }
-
-    private var wordToGuess: String = MainActivity.wordsToGuess.random().uppercase()
-    private var enteredText: String = ""
+    private var wordToGuess: String = WordSupplier.randomWord()
+    private var enteredText by mutableStateOf("")
     private var charList by mutableStateOf(Array(6) { Array(5) { ' ' } })
     private var currentGuess: Int = 0
-    private var userWon by mutableStateOf(false)
-    private var isGameOver by mutableStateOf(false)
+    private var alerting by mutableStateOf(false)
+
+    private var displayedAlert: @Composable (() -> Unit)? = null
+
+    private val userWonAlert: @Composable () -> Unit = {
+        AlertView(
+            title = "Congrats!",
+            body = "You won in ${currentGuess + 1}",
+            buttonLabel = "Reset Game"
+        ) {
+            resetGame()
+        }
+    }
+
+    private val gameOverAlert: @Composable () -> Unit = {
+        AlertView(title = "Game over!`", body = "The correct word was: $wordToGuess", buttonLabel = "Reset Game") {
+            resetGame()
+        }
+    }
+
+    private val enterFiveLetterWord: @Composable () -> Unit = {
+        AlertView(title = "Invalid word", body = "Please enter a 5 letter word", buttonLabel = "Ok") {
+            alerting = false
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,63 +75,31 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Column(
                         modifier = Modifier
-                            .padding(top = 8.dp)
+                            .padding(top = 8.dp),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(wordToGuess)
-
                         WordleGrid(charList, wordToGuess)
 
-                        var text by remember { mutableStateOf("") }
-
                         OutlinedTextField(
-                            value = text,
+                            modifier = Modifier.padding(8.dp),
+                            value = enteredText,
+                            singleLine = true,
+
                             onValueChange = {
-                                text = validateText(it)
-                                enteredText = text
+                                enteredText = validateText(it)
                             }
                         )
 
-                        Button(onClick = { enterClicked() }) {
+                        Button(
+                            modifier = Modifier.padding(8.dp),
+                            onClick = { enterClicked() }) {
                             Text("Enter")
                         }
 
                         // Show alert dialog when user wins
-                        if (userWon) {
-                            AlertDialog(
-                                onDismissRequest = { resetGame() },
-                                title = {
-                                    Text("Congrats!")
-                                },
-                                text = {
-                                    Text("You won in ${currentGuess + 1}")
-                                },
-                                confirmButton = {
-                                    TextButton(
-                                        onClick = { resetGame() },
-                                    ) {
-                                        Text("Ok")
-                                    }
-                                }
-                            )
-                        }
-
-                        if (isGameOver) {
-                            AlertDialog(
-                                onDismissRequest = { resetGame() }, // Reset state when dialog is dismissed
-                                title = {
-                                    Text("You lose")
-                                },
-                                text = {
-                                    Text("The correct word was: $wordToGuess")
-                                },
-                                confirmButton = {
-                                    TextButton(
-                                        onClick = { resetGame() }, // Reset state when confirm button is clicked
-                                    ) {
-                                        Text("Ok")
-                                    }
-                                }
-                            )
+                        if(alerting) {
+                            displayedAlert?.let { it() }
                         }
                     }
                 }
@@ -126,20 +107,43 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Composable
+    fun AlertView(title: String, body: String, buttonLabel: String, onClick: () -> Unit) {
+        AlertDialog(
+            onDismissRequest = { onClick() },
+            title = {
+                Text(title)
+            },
+            text = {
+                Text(body)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { onClick() },
+                ) {
+                    Text(buttonLabel)
+                }
+            }
+        )
+    }
+
     private fun resetGame() {
-        wordToGuess = MainActivity.wordsToGuess.random()
+        wordToGuess = WordSupplier.randomWord()
         enteredText = ""
         charList = Array(6) { Array(5) { ' ' } }
         currentGuess = 0
-        userWon = false
-        isGameOver = false
+        alerting = false
     }
 
     private fun validateText(text: String): String {
         var string = text
 
+        // Remove any non-letter characters from the input text
+        string = string.filter { it.isLetter() }
+
+        // Ensure the resulting string is no longer than 5 characters
         if (string.length > 5) {
-            string = string.subSequence(0, 5).toString()
+            string = string.substring(0, 5)
         }
 
         return string
@@ -148,11 +152,12 @@ class MainActivity : ComponentActivity() {
     private fun enterClicked() {
         // Check if the entered string is exactly 5 letters
         if (enteredText.length != 5 ) {
-            // TODO possibly alert the user
+            displayedAlert = enterFiveLetterWord
+            alerting = true
             return
         }
 
-        if(currentGuess >= 6 || isGameOver || userWon) {
+        if(currentGuess >= 6) {
             return
         }
 
@@ -165,29 +170,32 @@ class MainActivity : ComponentActivity() {
 
         if(enteredText.equals(wordToGuess, ignoreCase = true)) {
             // the user has won, alert the user
-            userWon = true
-        } else if (currentGuess > 5){
+            displayedAlert = userWonAlert
+            alerting = true
+        } else if (currentGuess > 4){
             // the user has used all guesses, they lose
-            isGameOver = true
+            displayedAlert = gameOverAlert
+            alerting = true
         } else {
             // continue to next guess
             currentGuess++
         }
-    }
 
+        enteredText = ""
+    }
 }
 
 @Composable
 fun WordleGrid(charList: Array<Array<Char>>, wordToGuess: String) {
     Column(
         modifier = Modifier
-            .wrapContentSize(Alignment.TopCenter)
     ) {
         for (rowIndex in charList.indices) {
             val row = charList[rowIndex]
 
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
                 for (columnIndex in row.indices) {
                     val char = row[columnIndex]
@@ -213,13 +221,13 @@ fun LetterBox(letter: String, color: Color) {
         modifier = Modifier
             .padding(6.dp)
             .background(color)
-            .wrapContentSize(Alignment.Center) // Center align content inside the box
+            .wrapContentSize(Alignment.Center)
     ) {
         Text(
             text = letter,
             modifier = Modifier
-                .padding(20.dp)
-                .align(Alignment.Center) // Align text to the center of the box
+                .padding(30.dp)
+                .align(Alignment.Center)
         )
     }
 }
