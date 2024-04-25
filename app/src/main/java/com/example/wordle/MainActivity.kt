@@ -154,7 +154,7 @@ class MainActivity : ComponentActivity() {
         return string
     }
 
-    fun textEnteredChanged(newValue: String) {
+    private fun textEnteredChanged(newValue: String) {
         // Validate the text
         enteredText = validateText(newValue)
 
