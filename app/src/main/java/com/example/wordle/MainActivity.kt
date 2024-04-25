@@ -28,9 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.wordle.ui.theme.WordleTheme
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 class MainActivity : ComponentActivity() {
@@ -79,7 +83,7 @@ class MainActivity : ComponentActivity() {
                         verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        WordleGrid(charList, wordToGuess)
+                        WordleGrid(charList, wordToGuess, currentGuess)
 
                         OutlinedTextField(
                             modifier = Modifier.padding(8.dp),
@@ -87,7 +91,7 @@ class MainActivity : ComponentActivity() {
                             singleLine = true,
 
                             onValueChange = {
-                                enteredText = validateText(it)
+                                textEnteredChanged(it)
                             }
                         )
 
@@ -149,6 +153,31 @@ class MainActivity : ComponentActivity() {
         return string
     }
 
+    fun textEnteredChanged(newValue: String) {
+        // Validate the text
+        enteredText = validateText(newValue)
+
+        // Make sure list has exactly 5 characters
+        var textToDisplay = enteredText
+        if (textToDisplay.length < 5) {
+            val spacesToAdd: Int = 5 - textToDisplay.length
+            var whiteSpace = ""
+            repeat(spacesToAdd) {
+                whiteSpace += " "
+            }
+
+            // Append whitespace to the end of the text
+            textToDisplay += whiteSpace
+        }
+
+        val charArray = textToDisplay.uppercase().toCharArray().toTypedArray()
+
+        // Create a new copy of charList and update it with the new values to update UI properly
+        charList = charList.copyOf().also {
+            it[currentGuess] = charArray
+        }
+    }
+
     private fun enterClicked() {
         // Check if the entered string is exactly 5 letters
         if (enteredText.length != 5 ) {
@@ -186,7 +215,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun WordleGrid(charList: Array<Array<Char>>, wordToGuess: String) {
+fun WordleGrid(charList: Array<Array<Char>>, wordToGuess: String, currentGuessIndex: Int) {
     Column(
         modifier = Modifier
     ) {
@@ -200,10 +229,18 @@ fun WordleGrid(charList: Array<Array<Char>>, wordToGuess: String) {
                 for (columnIndex in row.indices) {
                     val char = row[columnIndex]
 
-                    val color = if (char == wordToGuess[columnIndex]) {
-                        Color.Green
-                    } else if (wordToGuess.contains(char)) {
-                        Color.Yellow
+                    val color = if (rowIndex != currentGuessIndex) {
+                        if (char == wordToGuess[columnIndex]) {
+                            Color.Green
+                        } else if (wordToGuess.contains(char)) {
+                            Color.Yellow
+                        } else {
+                            if (rowIndex < currentGuessIndex) {
+                                Color.Gray
+                            } else {
+                                Color.LightGray
+                            }
+                        }
                     } else {
                         Color.LightGray
                     }
@@ -225,8 +262,9 @@ fun LetterBox(letter: String, color: Color) {
     ) {
         Text(
             text = letter,
+            style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
             modifier = Modifier
-                .padding(30.dp)
+                .padding(25.dp)
                 .align(Alignment.Center)
         )
     }
