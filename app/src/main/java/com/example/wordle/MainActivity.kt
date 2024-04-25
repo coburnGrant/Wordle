@@ -87,23 +87,24 @@ class MainActivity : ComponentActivity() {
                     ) {
                         WordleGrid(charList, wordToGuess, currentGuess)
 
-                        OutlinedTextField(
-                            modifier = Modifier.padding(8.dp),
-                            value = enteredText,
-                            singleLine = true,
+                        Row {
+                            OutlinedTextField(
+                                modifier = Modifier.padding(8.dp),
+                                value = enteredText,
+                                singleLine = true,
 
-                            onValueChange = {
-                                textEnteredChanged(it)
+                                onValueChange = {
+                                    textEnteredChanged(it)
+                                }
+                            )
+
+                            Button(
+                                modifier = Modifier.padding(8.dp),
+                                onClick = { enterClicked() }) {
+                                Text("Enter")
                             }
-                        )
-
-                        Button(
-                            modifier = Modifier.padding(8.dp),
-                            onClick = { enterClicked() }) {
-                            Text("Enter")
                         }
 
-                        // Show alert dialog when user wins
                         if(alerting) {
                             displayedAlert?.let { it() }
                         }
@@ -159,6 +160,10 @@ class MainActivity : ComponentActivity() {
         // Validate the text
         enteredText = validateText(newValue)
 
+        updateGrid()
+    }
+
+    private fun updateGrid() {
         // Make sure list has exactly 5 characters
         var textToDisplay = enteredText
         if (textToDisplay.length < 5) {
@@ -175,6 +180,10 @@ class MainActivity : ComponentActivity() {
         val charArray = textToDisplay.uppercase().toCharArray().toTypedArray()
 
         // Create a new copy of charList and update it with the new values to update UI properly
+        if(currentGuess > 5) {
+            currentGuess = 5
+        }
+
         charList = charList.copyOf().also {
             it[currentGuess] = charArray
         }
@@ -192,27 +201,21 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        val charArray = enteredText.uppercase().toCharArray().toTypedArray()
-
-        // Create a new copy of charList and update it with the new values to update UI properly
-        charList = charList.copyOf().also {
-            it[currentGuess] = charArray
-        }
+        updateGrid()
+        currentGuess++
 
         if(enteredText.equals(wordToGuess, ignoreCase = true)) {
             // the user has won, alert the user
             displayedAlert = userWonAlert
             alerting = true
-        } else if (currentGuess > 4){
+        } else if (currentGuess > 5){
             // the user has used all guesses, they lose
             displayedAlert = gameOverAlert
             alerting = true
         } else {
-            // continue to next guess
-            currentGuess++
+            enteredText = ""
+            updateGrid()
         }
-
-        enteredText = ""
     }
 }
 
