@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,6 +37,7 @@ import com.example.wordle.ui.theme.WordleTheme
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private var wordToGuess: String = WordSupplier.randomWord()
@@ -57,7 +59,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private val gameOverAlert: @Composable () -> Unit = {
-        AlertView(title = "Game over!`", body = "The correct word was: $wordToGuess", buttonLabel = "Reset Game") {
+        AlertView(title = "Game over!", body = "The correct word was: ${wordToGuess.lowercase().capitalize(locale = Locale.US)}", buttonLabel = "Reset Game") {
             resetGame()
         }
     }
