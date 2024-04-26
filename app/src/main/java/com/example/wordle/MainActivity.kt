@@ -31,15 +31,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.wordle.ui.theme.WordleTheme
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
 
-public val gray: Color = Color(120, 124, 126)
-public val yellow: Color = Color(201, 180, 88)
-public val green: Color = Color(106, 170, 100)
+val wordleGray: Color = Color(120, 124, 126)
+val wordleYellow: Color = Color(201, 180, 88)
+val wordleGreen: Color = Color(106, 170, 100)
 
 class MainActivity : ComponentActivity() {
     private var wordToGuess: String = WordSupplier.randomWord()
@@ -49,8 +48,6 @@ class MainActivity : ComponentActivity() {
     private var alerting by mutableStateOf(false)
 
     private var displayedAlert: @Composable (() -> Unit)? = null
-
-
 
     private val userWonAlert: @Composable () -> Unit = {
         AlertView(
@@ -240,12 +237,12 @@ fun WordleGrid(charList: Array<Array<Char>>, wordToGuess: String, currentGuessIn
 
                     val boxColor: Color = if (rowIndex != currentGuessIndex) {
                         if (char == wordToGuess[columnIndex]) {
-                            green
+                            wordleGreen
                         } else if (wordToGuess.contains(char)) {
-                            yellow
+                            wordleYellow
                         } else {
                             if (rowIndex < currentGuessIndex) {
-                                gray
+                                wordleGray
                             } else {
                                 Color.LightGray
                             }

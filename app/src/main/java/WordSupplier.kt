@@ -1,6 +1,6 @@
 class WordSupplier {
     companion object {
-        public val wordsToGuess = arrayOf(
+        val wordsToGuess = arrayOf(
             "ABACK", "ABASE", "ABATE", "ABBEY", "ABIDE", "ABOUT", "ABOVE", "ABYSS", "ACRID", "ACTOR",
             "ACUTE", "ADAPT", "ADMIT", "ADOBE", "ADOPT", "ADORE", "ADULT", "AFTER", "AGAIN", "AGAPE",
             "AGATE", "AGENT", "AGILE", "AGING", "AGLOW", "AGONY", "AGREE", "AHEAD", "ALBUM", "ALIEN",
@@ -106,7 +106,7 @@ class WordSupplier {
             "WORST", "WOULD", "WOVEN", "WRATH", "WRIST", "WRITE", "WRONG", "WROTE", "WRUNG", "YACHT",
             "YEARN", "YIELD", "YOUNG", "YOUTH", "ZESTY"
         )
-        public fun randomWord(): String {
+        fun randomWord(): String {
            return WordSupplier.wordsToGuess.random().uppercase()
         }
     }
