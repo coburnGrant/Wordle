@@ -98,7 +98,7 @@ class WordSupplier {
             "TRICE", "TRITE", "TROLL", "TROPE", "TROVE", "TRUSS", "TRUST", "TRUTH", "TRYST", "TWANG",
             "TWEAK", "TWEED", "TWICE", "TWINE", "TWIRL", "ULCER", "ULTRA", "UNCLE", "UNDER", "UNDUE",
             "UNFIT", "UNIFY", "UNITE", "UNLIT", "UNMET", "UNTIE", "UNTIL", "UNZIP", "UPSET", "URBAN",
-            "USAGE", "USHER", "USING", "USUAL", "USURP", "UTTER", "VAGUE", "VALET", "VALID", "VENOM",
+            "USAGE", "USHER", "USING", "USUAL", "USURP", "UTTER", "VAGUE", "VALET", "VALID", "VENOM", "VAPID",
             "VERGE", "VERVE", "VIGOR", "VIOLA", "VIRAL", "VITAL", "VIVID", "VODKA", "VOICE", "VOILA",
             "VOTER", "VOUCH", "WACKY", "WALTZ", "WASTE", "WATCH", "WEARY", "WEDGE", "WHACK", "WHALE",
             "WHEEL", "WHELP", "WHERE", "WHICH", "WHIFF", "WHILE", "WHINE", "WHINY", "WHIRL", "WHISK",
@@ -106,7 +106,6 @@ class WordSupplier {
             "WORST", "WOULD", "WOVEN", "WRATH", "WRIST", "WRITE", "WRONG", "WROTE", "WRUNG", "YACHT",
             "YEARN", "YIELD", "YOUNG", "YOUTH", "ZESTY"
         )
-
         public fun randomWord(): String {
            return WordSupplier.wordsToGuess.random().uppercase()
         }

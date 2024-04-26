@@ -37,6 +37,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
 
+public val gray: Color = Color(120, 124, 126)
+public val yellow: Color = Color(201, 180, 88)
+public val green: Color = Color(106, 170, 100)
+
 class MainActivity : ComponentActivity() {
     private var wordToGuess: String = WordSupplier.randomWord()
     private var enteredText by mutableStateOf("")
@@ -45,6 +49,8 @@ class MainActivity : ComponentActivity() {
     private var alerting by mutableStateOf(false)
 
     private var displayedAlert: @Composable (() -> Unit)? = null
+
+
 
     private val userWonAlert: @Composable () -> Unit = {
         AlertView(
@@ -232,14 +238,14 @@ fun WordleGrid(charList: Array<Array<Char>>, wordToGuess: String, currentGuessIn
                 for (columnIndex in row.indices) {
                     val char = row[columnIndex]
 
-                    val color = if (rowIndex != currentGuessIndex) {
+                    val boxColor: Color = if (rowIndex != currentGuessIndex) {
                         if (char == wordToGuess[columnIndex]) {
-                            Color.Green
+                            green
                         } else if (wordToGuess.contains(char)) {
-                            Color.Yellow
+                            yellow
                         } else {
                             if (rowIndex < currentGuessIndex) {
-                                Color.Gray
+                                gray
                             } else {
                                 Color.LightGray
                             }
@@ -248,7 +254,13 @@ fun WordleGrid(charList: Array<Array<Char>>, wordToGuess: String, currentGuessIn
                         Color.LightGray
                     }
 
-                    LetterBox(letter = char.toString(), color = color)
+                    val textColor = if(boxColor == Color.LightGray) {
+                        Color.Black
+                    } else {
+                        Color.White
+                    }
+
+                    LetterBox(letter = char.toString(), boxColor = boxColor, textColor = textColor)
                 }
             }
         }
@@ -256,7 +268,7 @@ fun WordleGrid(charList: Array<Array<Char>>, wordToGuess: String, currentGuessIn
 }
 
 @Composable
-fun LetterBox(letter: String, color: Color) {
+fun LetterBox(letter: String, boxColor: Color, textColor: Color) {
     val screenWidth = LocalConfiguration.current.screenWidthDp
     print("screen width: $screenWidth")
     val boxWidth = (screenWidth - 75)/ 5
@@ -264,24 +276,25 @@ fun LetterBox(letter: String, color: Color) {
     Box(
         modifier = Modifier
             .padding(6.dp)
-            .background(color)
+            .background(boxColor)
             .size(width = boxWidth.dp, height = boxWidth.dp)
             .wrapContentSize(Alignment.Center)
     ) {
         Text(
             text = letter,
+            color = textColor,
             style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
             modifier = Modifier
-                .padding(25.dp)
+                .padding(15.dp)
                 .align(Alignment.Center)
         )
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WordleTheme {
-        LetterBox(letter = "String", color = Color.LightGray)
-    }
-}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun GreetingPreview() {
+//    WordleTheme {
+////        LetterBox(letter = "String", color = Color.LightGray)
+//    }
+//}
