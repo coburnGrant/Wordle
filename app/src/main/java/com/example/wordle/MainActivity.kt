@@ -34,6 +34,11 @@ import androidx.compose.ui.text.font.FontWeight
 import com.example.wordle.ui.theme.WordleTheme
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+
 import java.util.Locale
 
 val wordleGray: Color = Color(120, 124, 126)
@@ -80,37 +85,57 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(top = 8.dp),
-                        verticalArrangement = Arrangement.Top,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        WordleGrid(charList, wordToGuess, currentGuess)
-
-                        Row {
-                            OutlinedTextField(
-                                modifier = Modifier.padding(8.dp),
-                                value = enteredText,
-                                singleLine = true,
-
-                                onValueChange = {
-                                    textEnteredChanged(it)
-                                }
-                            )
-
-                            Button(
-                                modifier = Modifier.padding(8.dp),
-                                onClick = { enterClicked() }) {
-                                Text("Enter")
+                    val navController: NavHostController = rememberNavController()
+                    NavHost(navController = navController, startDestination = "main") {
+                        composable("main") {
+                            WordleApp(navController)
+                        }
+                        
+                        composable("settings") {
+                            Column {
+                                Text(text = "Hello World!")
                             }
                         }
-
-                        if(alerting) {
-                            displayedAlert?.let { it() }
-                        }
                     }
+
                 }
+            }
+        }
+    }
+
+    @Composable
+    fun WordleApp(navHostController: NavHostController) {
+        Column(
+            modifier = Modifier
+                .padding(top = 8.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(onClick = { navHostController.navigate("settings") }) {
+                Text("Settings")
+            }
+            WordleGrid(charList, wordToGuess, currentGuess)
+
+            Row {
+                OutlinedTextField(
+                    modifier = Modifier.padding(8.dp),
+                    value = enteredText,
+                    singleLine = true,
+
+                    onValueChange = {
+                        textEnteredChanged(it)
+                    }
+                )
+
+                Button(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = { enterClicked() }) {
+                    Text("Enter")
+                }
+            }
+
+            if(alerting) {
+                displayedAlert?.let { it() }
             }
         }
     }
