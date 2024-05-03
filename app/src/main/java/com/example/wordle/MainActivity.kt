@@ -14,13 +14,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,14 +46,15 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-
 import java.util.Locale
 
 val wordleGray: Color = Color(120, 124, 126)
 val wordleYellow: Color = Color(201, 180, 88)
 val wordleGreen: Color = Color(106, 170, 100)
 
+@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     private var wordToGuess: String = WordSupplier.randomWord()
     private var enteredText by mutableStateOf("")
@@ -81,39 +91,94 @@ class MainActivity : ComponentActivity() {
         setContent {
             WordleTheme {
                 Surface(
-                    modifier = Modifier
-                        .fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val navController: NavHostController = rememberNavController()
-                    NavHost(navController = navController, startDestination = "main") {
-                        composable("main") {
-                            WordleApp(navController)
-                        }
-                        
-                        composable("settings") {
-                            Column {
-                                Text(text = "Hello World!")
-                            }
-                        }
-                    }
-
+                    WordleApp()
                 }
             }
         }
     }
 
     @Composable
-    fun WordleApp(navHostController: NavHostController) {
+    fun WordleTopAppBar(
+        navController: NavHostController,
+        currentScreen: WordleScreen,
+        canNavigateBack: Boolean
+    ) {
+        TopAppBar(
+            title = { Text(text = currentScreen.title) },
+            navigationIcon = {
+                if(canNavigateBack) {
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            },
+            actions = {
+                if (currentScreen != WordleScreen.SETTINGS) {
+                    IconButton(onClick = {
+                        navController.navigate(WordleScreen.SETTINGS.route)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+                    }
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(MaterialTheme.colorScheme.primaryContainer),
+        )
+    }
+
+    @Composable
+    fun WordleApp() {
+        val navController: NavHostController = rememberNavController()
+
+        // Get current back stack entry
+        val backStackEntry by navController.currentBackStackEntryAsState()
+        // Get the name of the current screen
+        val currentScreen: WordleScreen = WordleScreen.fromRoute(backStackEntry?.destination?.route)
+
+        Scaffold(
+            topBar = {
+                WordleTopAppBar(
+                    navController = navController,
+                    currentScreen = currentScreen,
+                    canNavigateBack = navController.previousBackStackEntry != null)
+            }
+        ) {
+            NavHost(
+                navController = navController,
+                startDestination = WordleScreen.GAME.route,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) {
+                composable(WordleScreen.GAME.route) {
+                    WordleGameView()
+                }
+
+                composable(WordleScreen.SETTINGS.route) {
+                    Column {
+                        Text(text = "Hello World!")
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable fun WordleGameView() {
         Column(
             modifier = Modifier
                 .padding(top = 8.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(onClick = { navHostController.navigate("settings") }) {
-                Text("Settings")
-            }
             WordleGrid(charList, wordToGuess, currentGuess)
 
             Row {
@@ -312,11 +377,17 @@ fun LetterBox(letter: String, boxColor: Color, textColor: Color) {
         )
     }
 }
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun GreetingPreview() {
-//    WordleTheme {
-////        LetterBox(letter = "String", color = Color.LightGray)
-//    }
-//}
+
+enum class WordleScreen(val route: String, val title: String) {
+    GAME("game", "Wordle"),
+    SETTINGS("settings", "Settings");
+    companion object {
+        fun fromRoute(route: String?): WordleScreen {
+            return when (route) {
+                GAME.route -> GAME
+                SETTINGS.route -> SETTINGS
+                else -> GAME // Default to the game screen if route is null or not recognized
+            }
+        }
+    }
+}
