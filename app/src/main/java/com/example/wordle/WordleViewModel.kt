@@ -134,6 +134,7 @@ class WordleViewModel : ViewModel() {
 
         if(enteredText.equals(wordToGuess, ignoreCase = true)) {
             // the user has won, alert the user
+            currentGuess--
             displayedAlert = userWonAlert
             alerting = true
             numWins++

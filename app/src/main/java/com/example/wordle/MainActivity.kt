@@ -12,7 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.wordle.ui.theme.WordleTheme
 
 class MainActivity : ComponentActivity() {
-    val wordleViewModel: WordleViewModel = WordleViewModel()
+    private val wordleViewModel: WordleViewModel = WordleViewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
