@@ -1,3 +1,5 @@
+package com.example.wordle
+
 class WordSupplier {
     companion object {
         val wordsToGuess = arrayOf(
@@ -107,7 +109,7 @@ class WordSupplier {
             "YEARN", "YIELD", "YOUNG", "YOUTH", "ZESTY"
         )
         fun randomWord(): String {
-           return WordSupplier.wordsToGuess.random().uppercase()
+           return wordsToGuess.random().uppercase()
         }
     }
 }
